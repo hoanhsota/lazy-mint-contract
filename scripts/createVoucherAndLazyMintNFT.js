@@ -9,8 +9,7 @@ const lazyMintNFT = async () => {
   const SIGNING_VERSION = "1";
   const MINTER = signer;
 
-  const contractAddress = "0xe7d6CA36cf61344D7f38A7F207387f8F3a85eCB2";
-  const lazyMint = await ethers.getContractAt("LazyMint", contractAddress);
+  const lazyMint = await ethers.getContract("LazyMint");
 
   const domain = {
     name: SIGNING_DOMAIN,
