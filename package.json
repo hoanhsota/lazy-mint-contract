@@ -2,6 +2,7 @@
   "scripts": {
     "deploy-bsc": "npx hardhat run deploy/00_deploy_lazy_mint.js --network bsc_testnet",
     "deploy-mumbai": "npx hardhat run deploy/00_deploy_lazy_mint.js --network mumbai",
+    "deploy-shasta": "source .env && tronbox migrate --reset --network shasta",
     "create-sale-order-mumbai": "npx hardhat run scripts/createSalesOrder.js --network mumbai"
   },
   "devDependencies": {

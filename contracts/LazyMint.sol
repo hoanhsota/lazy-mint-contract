@@ -31,11 +31,6 @@ import "@openzeppelin/contracts/access/AccessControl.sol";
 
 contract LazyMint is ERC721, ERC721URIStorage, Ownable, EIP712, AccessControl {
 
-    error OnlyMinter(address to);
-    error NotEnoughValue(address to, uint256);
-    error NoFundsToWithdraw(uint256 balance);
-    error FailedToWithdraw(bool sent);
-
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
     string private constant SIGNING_DOMAIN = "Lazy-Domain";
     string private constant SIGNING_VERSION = "1";
@@ -43,7 +38,7 @@ contract LazyMint is ERC721, ERC721URIStorage, Ownable, EIP712, AccessControl {
     event NewMint(address indexed to, uint256 tokenId);
     event FundsWithdrawn(address indexed owner, uint256 amount);
 
-    struct LazyMintVoucher{
+    struct LazyMintVoucher {
         uint256 tokenId;
         uint256 price;
         string uri;
@@ -53,34 +48,32 @@ contract LazyMint is ERC721, ERC721URIStorage, Ownable, EIP712, AccessControl {
     constructor(address minter) ERC721("LazyMint", "MTK") EIP712(SIGNING_DOMAIN, SIGNING_VERSION) {
         _setupRole(MINTER_ROLE, minter);
     }
-    
+
 
     function mintNFT(address _to, LazyMintVoucher calldata _voucher) public payable {
         address signer = _verify(_voucher);
-        if(hasRole(MINTER_ROLE, signer)){
-            if(msg.value >= _voucher.price){
-                _safeMint(_to, _voucher.tokenId);
-                _setTokenURI(_voucher.tokenId, _voucher.uri);
-                emit NewMint(_to, _voucher.tokenId);
-            }else{
-                revert NotEnoughValue(_to, msg.value);
-            }
-        }else{
-            revert OnlyMinter(_to);
-        }
+        // make sure that the signer is authorized to mint NFTs
+        require(hasRole(MINTER_ROLE, signer), "Signature invalid or unauthorized");
+
+        // make sure that the redeemer is paying enough to cover the buyer's cost
+        require(msg.value >= _voucher.price, "Insufficient funds to mint NFT");
+
+        _safeMint(_to, _voucher.tokenId);
+        _setTokenURI(_voucher.tokenId, _voucher.uri);
+        emit NewMint(_to, _voucher.tokenId);
     }
 
-    function _hash(LazyMintVoucher calldata voucher) internal view returns(bytes32){
+    function _hash(LazyMintVoucher calldata voucher) internal view returns (bytes32){
         return _hashTypedDataV4(keccak256(abi.encode(
             //function selector
-            keccak256("LazyMintVoucher(uint256 tokenId,uint256 price,string uri)"),
-            voucher.tokenId,
-            voucher.price,
-            keccak256(bytes(voucher.uri))
-        )));
+                keccak256("LazyMintVoucher(uint256 tokenId,uint256 price,string uri)"),
+                voucher.tokenId,
+                voucher.price,
+                keccak256(bytes(voucher.uri))
+            )));
     }
 
-    function _verify(LazyMintVoucher calldata voucher) internal view returns(address){
+    function _verify(LazyMintVoucher calldata voucher) internal view returns (address){
         bytes32 digest = _hash(voucher);
         //returns signer
         return ECDSA.recover(digest, voucher.signature);
@@ -93,10 +86,10 @@ contract LazyMint is ERC721, ERC721URIStorage, Ownable, EIP712, AccessControl {
     }
 
     function tokenURI(uint256 tokenId)
-        public
-        view
-        override(ERC721, ERC721URIStorage)
-        returns (string memory)
+    public
+    view
+    override(ERC721, ERC721URIStorage)
+    returns (string memory)
     {
         return super.tokenURI(tokenId);
     }
@@ -105,11 +98,10 @@ contract LazyMint is ERC721, ERC721URIStorage, Ownable, EIP712, AccessControl {
         return ERC721.supportsInterface(interfaceId) || AccessControl.supportsInterface(interfaceId);
     }
 
-    function withdrawFunds() public onlyOwner{
+    function withdrawFunds() public onlyOwner {
         uint256 balance = address(this).balance;
-        if(balance <= 0){revert NoFundsToWithdraw(balance);}
-        (bool sent,) = msg.sender.call{value: balance}("");
-        if(!sent){revert FailedToWithdraw(sent);}
+        require(balance > 0, "No funds to withdraw");
+        payable(msg.sender).transfer(balance);
         emit FundsWithdrawn(msg.sender, balance);
     }
 }
