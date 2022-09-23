@@ -2,7 +2,9 @@
   "scripts": {
     "deploy-bsc": "npx hardhat run deploy/00_deploy_lazy_mint.js --network bsc_testnet",
     "deploy-mumbai": "npx hardhat run deploy/00_deploy_lazy_mint.js --network mumbai",
-    "create-sale-order-mumbai": "npx hardhat run scripts/createSalesOrder.js --network mumbai"
+    "create-sale-order-mumbai": "npx hardhat run scripts/createSalesOrder.js --network mumbai",
+    "deploy-payment-bsc": "npx hardhat run deploy/01_deploy_payment_contract.js --network bsc_testnet",
+    "deploy-erc20-bsc": "npx hardhat run deploy/02_deploy_erc20token_contract.js --network bsc_testnet"
   },
   "devDependencies": {
     "@ethersproject/abi": "^5.4.7",
