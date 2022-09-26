@@ -25,7 +25,7 @@ contract Payment is Ownable {
         adminAddress = msg.sender;
     }
 
-    function purchase(string memory _orderID, address _token, uint256 _amount) external {
+    function purchase(string memory referralId, address _token, uint256 _amount) external {
         require(_amount > 0, "Transfer amount invalid");
 
         require(IERC20(_token).balanceOf(msg.sender) >= _amount, "Insufficient token balance");

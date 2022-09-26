@@ -29,7 +29,7 @@ coverage.json
 bin/
 gen/
 out/
-#  Uncomment the following line in case you need and you don't have the release build type files in your app
+#  Uncomment the following line in case you need and you don't have the release dist type files in your app
 # release/
 
 # Gradle files
@@ -70,7 +70,7 @@ captures/
 #*.jks
 #*.keystore
 
-# External native build folder generated in Android Studio 2.2 and later
+# External native dist folder generated in Android Studio 2.2 and later
 .externalNativeBuild
 
 # Google Services (e.g. APIs or Firebase)
@@ -103,3 +103,5 @@ gas-report.txt
 typechain-types
 
 .idea
+# Local Netlify folder
+.netlify
